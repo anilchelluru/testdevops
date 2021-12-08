@@ -1,0 +1,28 @@
+# Assigning tasks to specific hosts
+
+---
+
+  - name: Play 1
+    hosts: nodes 
+    tasks:
+      - name: first task
+        debug:
+          msg: Hello Ansible
+
+      - name: install tree
+        yum:
+          name: tree
+          state: present
+
+  - name: Play 2
+    hosts: 172.31.17.60
+    tasks:
+    - name: install wget & curl
+      yum:
+        name: "{{item}}"
+        state: present
+      with_items:
+         - wget
+         - curl
+
+

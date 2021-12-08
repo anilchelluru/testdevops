@@ -1,0 +1,42 @@
+---
+# how to assign specific tasks to specific host
+
+- name: play 1
+  hosts: 172.31.17.60
+  gather_facts: false
+  tasks:
+    - name: update repo
+      yum:
+        name: "*"
+        state: latest
+
+- name: play 2 for  task2,task3
+  hosts: 172.31.17.60:172.31.38.20
+  gather_facts: false
+  tasks:
+    - name: Installing wget
+      yum:
+        name: "{{item}}"
+        state: present
+      with_items:
+         - git
+         - wget
+
+- name: play 3 for installing tree on all node servers
+  hosts: nodes
+  gather_facts: false
+  tasks:
+    - name: Installing tree
+      yum:
+        name: tree
+        state: present
+
+- name: check uptime on nginx server
+  hosts: nginx
+  gather_facts: false
+  tasks:
+    command: uptime
+    register: out_put
+  - debug: var=out_put
+
+
