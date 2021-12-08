@@ -1,0 +1,55 @@
+---
+# installation and configuration of Tomcat on node amazon linux
+
+- name: Install java and tomcat
+  hosts: 172.31.17.60
+  gather_facts: false
+  tasks:
+    - name: update repo
+      yum:
+        name: "*"
+        state: latest
+    - name: Installing openJDK
+      yum:
+        name: java-1.8.0*
+        state: present
+    
+    - name: installing wget in node server amazon linux
+      yum:
+        name: wget
+        state: latest
+
+    - name: Downloading tomcat 8.5.73
+      get_url:
+        url: https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.73/bin/apache-tomcat-8.5.73.tar.gz
+        dest: /opt
+
+    - name: Extracting downloaded tar file
+      unarchive:
+        src: "/opt/apache-tomcat-8.5.73.tar.gz"  
+        dest: /opt
+        remote_src: yes
+
+    - name: replace tomcat port to 8090 in server config
+      template:
+        src: /opt/playbooks_check/tomcatedits/server.xml.j2
+        dest: /opt/apache-tomcat-8.5.73/conf/server.xml
+
+    - name: adding Tomcat server users db and adding roles in Tomcat-users.xml
+      template:
+        src: /opt/playbooks_check/tomcatedits/tomcat-users.xml.j2
+        dest: /opt/apache-tomcat-8.5.73/conf/tomcat-users.xml
+
+    - name: Updating context xml for removing restriction of public ip from webapps/manager/Meta-inf/
+      template:
+        src: /opt/playbooks_check/tomcatedits/context.mgr.xml.j2
+        dest: /opt/apache-tomcat-8.5.73/webapps/manager/META-INF/context.xml
+
+    - name: to remove restriction of public ip in browser from host manager folder, context xml
+      template:
+        src: /opt/playbooks_check/tomcatedits/context.hostmgr.xml.j2
+        dest: /opt/apache-tomcat-8.5.73/webapps/host-manager/META-INF/context.xml
+
+    - name: Starting tomcat
+      shell: nohup /opt/apache-tomcat-8.5.73/bin/startup.sh &
+
